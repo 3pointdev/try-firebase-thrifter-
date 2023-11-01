@@ -1,6 +1,7 @@
 import Header from "components/header/header";
 import App from "next/app";
 import { NextRouter, withRouter } from "next/router";
+import "reflect-metadata";
 import "styles/globals.css";
 
 class MyApp extends App<any, any, any> {
