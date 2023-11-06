@@ -10,10 +10,10 @@ import FilterModel from "src/models/filter.model";
 interface IProps {
   addressList: AddressList;
   onChangePrice: ChangeEventHandler;
-  // onChangePrice: ({ min, max }: { min: number; max: number }) => void;
   onChangeAddress: ChangeEventHandler;
   selectedList: FilterModel;
   onClick: MouseEventHandler;
+  onClickDeleteOption: MouseEventHandler;
 }
 
 export interface AddressList {
@@ -28,11 +28,12 @@ export default function Filter({
   onChangeAddress,
   selectedList,
   onClick,
+  onClickDeleteOption,
 }: IProps) {
   const [isOpenFilter, setIsOpenFilter] = useState<boolean>(false);
 
   return (
-    <section className="border-t border-gray-600 px-4 lg:px-6 py-1 bg-white dark:bg-gray-800 flex items-center h-12 gap-4">
+    <section className="border-t border-gray-600 px-4 lg:px-6 py-1 bg-white dark:bg-gray-800 flex items-center h-12 gap-4 overflow-y-auto">
       <button
         className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
         onClick={() => setIsOpenFilter(!isOpenFilter)}
@@ -42,32 +43,56 @@ export default function Filter({
           color="black"
           className="text-[14px]"
         />
-        <p className="text-black text-[14px]">필터</p>
+        <p className="text-black whitespace-nowrap text-[14px] whitespace-nowrap">
+          필터
+        </p>
       </button>
       {(selectedList.min > 0 || selectedList.max < 1000000) && (
-        <button className="flex items-center gap-1 border rounded px-2 w-fit bg-white">
-          <p className="text-black text-[14px]">{`${selectedList.min}원~${selectedList.max}원`}</p>
+        <button
+          className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
+          onClick={onClickDeleteOption}
+          value={"price"}
+        >
+          <p className="text-black whitespace-nowrap text-[14px]">{`${selectedList.min}원~${selectedList.max}원`}</p>
         </button>
       )}
       {selectedList.dong.length > 0 ? (
-        selectedList.dong.map((filterItem: any, index: number) => {
-          return (
-            <button
-              className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
-              key={`selected_item_${index}`}
-            >
-              <p className="text-black text-[14px]">{filterItem.name}</p>
-            </button>
-          );
-        })
+        selectedList.dong.map(
+          (filterItem: AddressDto | undefined, index: number) => {
+            return (
+              <button
+                className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
+                key={`selected_item_${index}`}
+                onClick={onClickDeleteOption}
+                value={filterItem?.code}
+              >
+                <p className="text-black whitespace-nowrap text-[14px]">
+                  {filterItem?.name}
+                </p>
+              </button>
+            );
+          }
+        )
       ) : selectedList.gungu?.name ? (
-        <button className="flex items-center gap-1 border rounded px-2 w-fit bg-white">
-          <p className="text-black text-[14px]">{selectedList.gungu.name}</p>
+        <button
+          className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
+          onClick={onClickDeleteOption}
+          value={"gungu"}
+        >
+          <p className="text-black whitespace-nowrap text-[14px]">
+            {selectedList.gungu.name}
+          </p>
         </button>
       ) : (
         selectedList.sido?.name && (
-          <button className="flex items-center gap-1 border rounded px-2 w-fit bg-white">
-            <p className="text-black text-[14px]">{selectedList.sido.name}</p>
+          <button
+            className="flex items-center gap-1 border rounded px-2 w-fit bg-white"
+            onClick={onClickDeleteOption}
+            value={"sido"}
+          >
+            <p className="text-black whitespace-nowrap text-[14px]">
+              {selectedList.sido.name}
+            </p>
           </button>
         )
       )}
@@ -113,6 +138,23 @@ export default function Filter({
               addressList={addressList}
             />
           </ul>
+        </div>
+        <div className="w-full flex items-center justify-center gap-8">
+          <button
+            type="button"
+            className="inline-block rounded border-2 border-gray-600 px-6 pb-[6px] pt-2 text-sm font-medium uppercase leading-normal text-gray-600 transition duration-150 ease-in-out hover:border-gray-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-gray-600 focus:border-gray-600 focus:text-gray-600 focus:outline-none focus:ring-0 active:border-gray-700 active:text-gray-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
+            onClick={onClickDeleteOption}
+            value={"all"}
+          >
+            초기화
+          </button>
+          <button
+            type="button"
+            className="inline-block rounded border-2 border-gray-600 px-6 pb-[6px] pt-2 text-sm font-medium uppercase leading-normal text-gray-600 transition duration-150 ease-in-out hover:border-gray-600 hover:bg-neutral-500 hover:bg-opacity-10 hover:text-gray-600 focus:border-gray-600 focus:text-gray-600 focus:outline-none focus:ring-0 active:border-gray-700 active:text-gray-700 dark:hover:bg-neutral-100 dark:hover:bg-opacity-10"
+            onClick={() => setIsOpenFilter(!isOpenFilter)}
+          >
+            닫기
+          </button>
         </div>
       </div>
     </section>

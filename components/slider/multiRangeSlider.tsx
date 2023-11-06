@@ -1,5 +1,11 @@
 import PropTypes from "prop-types";
-import { ChangeEventHandler, useCallback, useEffect, useRef } from "react";
+import {
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import styles from "./multiRangeSlider.module.css";
 
 interface IProps {
@@ -12,6 +18,7 @@ interface IProps {
 
 function MultiRangeSlider({ min, max, minValue, maxValue, onChange }: IProps) {
   const range = useRef<HTMLDivElement>(null);
+  const [isServer, setIsServer] = useState(true);
 
   const getPercent = useCallback(
     (value: number) => Math.round(((value - min) / (max - min)) * 100),
@@ -31,68 +38,79 @@ function MultiRangeSlider({ min, max, minValue, maxValue, onChange }: IProps) {
   useEffect(() => {
     const minPercent = getPercent(minValue);
     const maxPercent = getPercent(maxValue);
-    console.log(minPercent, maxPercent);
+
     if (range.current) {
       range.current.style.width = `${maxPercent - minPercent}%`;
     }
   }, [maxValue, getPercent]);
 
-  return (
-    <div className={styles.container}>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={minValue}
-        onChange={onChange}
-        id={"min"}
-        className={`${styles.thumb} ${styles.thumb_left}`}
-        style={{ zIndex: minValue > max - 100 ? "5" : "" }}
-      />
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={maxValue}
-        onChange={onChange}
-        id={"max"}
-        className={`${styles.thumb} ${styles.thumb_right}`}
-      />
+  useEffect(() => {
+    setIsServer(true);
+  }, []);
 
-      <div className={styles.slider}>
-        <div className={styles.slider__track} />
-        <div ref={range} className={styles.slider__range} />
-        <div className={styles.slider__left_value}>
-          <input
-            value={minValue}
-            min={min}
-            max={max}
-            style={{
-              width: "60px",
-              height: "25px",
-              border: "1px solid gray",
-              borderRadius: "4px",
-              textAlign: "center",
-            }}
-          />
-        </div>
-        <div className={styles.slider__right_value}>
-          <input
-            value={maxValue}
-            min={min - 1}
-            max={max}
-            style={{
-              width: "60px",
-              height: "25px",
-              border: "1px solid gray",
-              borderRadius: "4px",
-              textAlign: "center",
-            }}
-          />
+  if (isServer)
+    return (
+      <div className={styles.container}>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={minValue}
+          onChange={onChange}
+          id={"min"}
+          className={`${styles.thumb} ${styles.thumb_left} ${
+            minValue > max - 100 ? "z-10" : ""
+          }`}
+          // style={{ zIndex: minValue > max - 100 ? "5" : "" }}
+        />
+        <input
+          type="range"
+          min={min}
+          max={max}
+          value={maxValue}
+          onChange={onChange}
+          id={"max"}
+          className={`${styles.thumb} ${styles.thumb_right}`}
+        />
+
+        <div className={styles.slider}>
+          <div className={styles.slider__track} />
+          <div ref={range} className={styles.slider__range} />
+          <div className={styles.slider__left_value}>
+            <input
+              value={minValue}
+              min={min}
+              max={max}
+              style={{
+                width: "60px",
+                height: "25px",
+                border: "1px solid gray",
+                borderRadius: "4px",
+                textAlign: "center",
+              }}
+              onChange={onChange}
+              id={"input_min"}
+            />
+          </div>
+          <div className={styles.slider__right_value}>
+            <input
+              onChange={onChange}
+              id={"input_max"}
+              value={maxValue}
+              min={min - 1}
+              max={max}
+              style={{
+                width: "60px",
+                height: "25px",
+                border: "1px solid gray",
+                borderRadius: "4px",
+                textAlign: "center",
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
 }
 
 MultiRangeSlider.propTypes = {
