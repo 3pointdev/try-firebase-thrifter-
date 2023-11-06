@@ -1,4 +1,5 @@
 import Filter from "components/navigation/filter";
+import ProductList from "components/product/productList";
 import { NextRouter } from "next/router";
 import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
 import { AddressDto } from "src/dto/address.dto";
@@ -54,16 +55,40 @@ export default function Home(props: IPageProps) {
   const onChangePrice = (event: ChangeEvent<HTMLInputElement>) => {
     const { value, id } = event.target;
 
-    if (id === "min" && +value <= filted.max - 10000) {
-      setFilted({ ...filted, min: Math.floor(+value / 10000) * 10000 });
-    } else if (id === "max" && +value >= filted.min + 10000) {
-      setFilted({ ...filted, max: Math.floor(+value / 10000) * 10000 });
+    switch (id) {
+      case "min":
+        if (+value <= filted.max - 10000) {
+          setFilted({ ...filted, min: Math.floor(+value / 10000) * 10000 });
+        }
+        break;
+      case "max":
+        if (+value >= filted.min + 10000) {
+          setFilted({ ...filted, max: Math.floor(+value / 10000) * 10000 });
+        }
+        break;
+      case "input_min":
+        if (+value <= 990000) {
+          if (+value < filted.max) {
+            setFilted({ ...filted, min: +value });
+          } else {
+            setFilted({ ...filted, min: +value, max: +value + 10000 });
+          }
+        }
+        break;
+      case "input_max":
+        if (+value >= 10000) {
+          if (+value > filted.min) {
+            setFilted({ ...filted, min: +value });
+          } else {
+            setFilted({ ...filted, max: +value, min: +value - 10000 });
+          }
+        }
+        break;
     }
   };
 
   const onChangeAddress = async (event: ChangeEvent<HTMLInputElement>) => {
     const { id, dataset, checked } = event.target;
-    console.log(checked);
 
     let target;
     switch (dataset.type) {
@@ -101,6 +126,34 @@ export default function Home(props: IPageProps) {
     }
   };
 
+  const onClickDeleteOption = (event: MouseEvent<HTMLButtonElement>) => {
+    const { value } = event.currentTarget;
+
+    switch (value) {
+      case "all":
+        setFilted(new FilterModel());
+        break;
+      case "price":
+        setFilted({ ...filted, min: 0, max: 1000000 });
+        break;
+      case "sido":
+        setFilted({ ...filted, sido: new AddressDto() });
+        break;
+      case "gungu":
+        setFilted({ ...filted, gungu: new AddressDto() });
+        break;
+      default:
+        setFilted({
+          ...filted,
+          dong: filted.dong.filter(
+            (dong: AddressDto | undefined) => dong?.code !== value
+          ),
+        });
+
+        break;
+    }
+  };
+
   return (
     <article>
       <Filter
@@ -108,9 +161,10 @@ export default function Home(props: IPageProps) {
         onChangePrice={onChangePrice}
         onChangeAddress={onChangeAddress}
         onClick={onClickInitializeFilter}
+        onClickDeleteOption={onClickDeleteOption}
         selectedList={filted}
       />
-      <section>상품</section>
+      <ProductList />
     </article>
   );
 }
